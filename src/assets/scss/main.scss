@@ -1,0 +1,65 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700&display=swap');
+@import 'vars.scss';
+
+*{
+padding: 0;
+margin: 0;
+border: 0;
+}
+*,*:before,*:after{
+box-sizing: border-box;
+}
+:focus,:active{outline: none;}
+a:focus,a:active{outline: none;}
+
+nav,footer,header,aside{display: block;}
+
+html,body{
+font-family: 'SB Sans Text', sans-serif;
+font-size: 100%;
+line-height: 1;
+color: #000000;
+-ms-text-size-adjust: 100%;
+-moz-text-size-adjust: 100%;
+-webkit-text-size-adjust: 100%;
+}
+input,button,textarea{font-family:inherit;}
+
+input::-ms-clear{display: none;}
+button{cursor: pointer;}
+a, a:visited{text-decoration: none;}
+a:hover{text-decoration: none;}
+ul, li{list-style: none;}
+img{vertical-align: top;}
+
+h1,h2,h3,h4,h5,h6{font-size: inherit;font-weight: 400;}
+
+body {
+    font-family: 'Montserrat', sans-serif;
+    background-color: $main-bg;
+    font-weight: $fw-medium;
+    position: relative;
+}
+
+.container {
+    max-width: 1320px;
+    padding: 0 10px;
+    margin: 0 auto;
+}
+
+h1 {
+    font-size: $fs-board-title;
+    font-weight: $fw-bold;
+}
+
+h3 {
+    font-weight: $fw-bold;
+}
+
+h5 {
+    font-weight: $fw-medium;
+}
+
+p {
+    font-weight: $fw-regular;
+}
