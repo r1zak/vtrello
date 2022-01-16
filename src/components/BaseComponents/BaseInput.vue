@@ -5,18 +5,13 @@
     :type="type"
     :placeholder="label"
     :value="modelValue"
-    @focus="focused = true"
-    @blur="focused = false"
+    :required="required"
+    @input="$emit('update:modelValue', $event.target.value)"
   />
 </template>
 
 <script>
 export default {
-  data() {
-    return {
-      focused: false,
-    };
-  },
   props: {
     label: {
       type: String,
@@ -26,6 +21,19 @@ export default {
     },
     type: {
       type: String,
+    },
+    required: {
+      type: Boolean,
+      default: false,
+    },
+  },
+  emits: ["update:modelValue"],
+  data() {
+    return {};
+  },
+  methods: {
+    updateValue(value) {
+      this.$emit("input", value);
     },
   },
 };
@@ -43,9 +51,5 @@ export default {
   border: 1px solid $black;
   padding: 10px 15px;
   font-family: inherit;
-}
-
-.focused {
-  border: 1px solid red;
 }
 </style>

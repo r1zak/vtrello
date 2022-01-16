@@ -43,12 +43,6 @@
           />
         </div>
       </div>
-      <div v-if="isPopupOpen" class="board__popup">
-        Lorem ipsum dolor sit amet consectetur adipisicing elit. Et molestias
-        veritatis quo nihil ab consequuntur voluptatibus fuga, provident sunt
-        quisquam quibusdam! Sapiente porro delectus, quibusdam corporis aliquam
-        dolores qui ad.
-      </div>
     </div>
     <div
       class="task"
@@ -223,8 +217,9 @@ export default {
   left: 50%;
   transform: translate(-50%, -50%);
   width: 100%;
-  height: 100%;
+  height: 101%;
   background: rgba(0, 0, 0, 0.5);
+  padding: 0 10px;
 }
 
 ::placeholder {

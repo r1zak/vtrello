@@ -1,16 +1,30 @@
 <template>
   <div class="auth">
     <div class="container">
-      <form class="auth__inner">
+      <form class="auth__inner" @submit.prevent="submitHandler">
         <fieldset>
           <legend>Welcome</legend>
-          <BaseInput label="Email" type="email" />
-          <BaseInput label="Password" type="password" />
-          <button class="btn">
+          <BaseInput
+            label="Email"
+            type="email"
+            v-model="email"
+            :required="true"
+          />
+          <BaseInput
+            label="Password"
+            type="password"
+            v-model="password"
+            :required="true"
+          />
+          <button class="btn" type="submit">
             Sign in
             <BaseIcon class="icon" name="log" />
           </button>
         </fieldset>
+        <h5>
+          Don't have an account?
+          <router-link to="/register">register</router-link>
+        </h5>
       </form>
     </div>
   </div>
@@ -19,15 +33,37 @@
 <script>
 import BaseInput from "@/components/BaseComponents/BaseInput.vue";
 import BaseIcon from "@/components/BaseComponents/BaseIcon.vue";
+// import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
 
 export default {
+  data() {
+    return {
+      email: "",
+      password: "",
+    };
+  },
   components: { BaseInput, BaseIcon },
+  methods: {
+    async submitHandler() {
+      const formData = {
+        email: this.email,
+        password: this.password,
+      };
+
+      try {
+        await this.$store.dispatch("login", formData);
+        this.$router.push("/");
+      } catch (e) {
+        console.log(e);
+      }
+    },
+  },
 };
 </script>
 
 <style lang="scss" scoped>
 .auth {
-  position: absolute;
+  position: fixed;
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);

@@ -1,5 +1,6 @@
 import defaultBoard from "../defaultBoard";
 import { saveStatePlugin, uuid } from "../utils";
+import auth from "./auth";
 
 import { createStore } from "vuex";
 
@@ -9,6 +10,7 @@ export default createStore({
   plugins: [saveStatePlugin],
   state: {
     board,
+    user: null,
   },
   getters: {
     getTask(state) {
@@ -42,5 +44,7 @@ export default createStore({
     },
   },
   actions: {},
-  modules: {},
+  modules: {
+    auth,
+  },
 });
