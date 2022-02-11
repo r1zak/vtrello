@@ -7,13 +7,13 @@
           <BaseInput
             label="Email"
             type="email"
-            v-model="email"
+            v-model="log_form.email"
             :required="true"
           />
           <BaseInput
             label="Password"
             type="password"
-            v-model="password"
+            v-model="log_form.password"
             :required="true"
           />
           <button class="btn" type="submit">
@@ -31,33 +31,27 @@
 </template>
 
 <script>
+import { ref } from "vue";
+import { useStore } from "vuex";
 import BaseInput from "@/components/BaseComponents/BaseInput.vue";
 import BaseIcon from "@/components/BaseComponents/BaseIcon.vue";
-// import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
 
 export default {
-  data() {
+  setup() {
+    const store = useStore();
+
+    const log_form = ref({});
+
+    const submitHandler = () => {
+      store.dispatch("login", log_form.value);
+    };
+
     return {
-      email: "",
-      password: "",
+      submitHandler,
+      log_form,
     };
   },
   components: { BaseInput, BaseIcon },
-  methods: {
-    async submitHandler() {
-      const formData = {
-        email: this.email,
-        password: this.password,
-      };
-
-      try {
-        await this.$store.dispatch("login", formData);
-        this.$router.push("/");
-      } catch (e) {
-        console.log(e);
-      }
-    },
-  },
 };
 </script>
 

@@ -4,59 +4,137 @@ import {
   createUserWithEmailAndPassword,
   signOut,
 } from "firebase/auth";
-import { ref, set } from "firebase/database";
+import { ref, set, child, get } from "firebase/database";
 import { auth, db } from "../firebase/firebase";
-// import { uuid } from "../utils";
+import { error } from "../error";
+const TOKEN_KEY = "jwt-token";
 
 export default {
   state: {
     user: null,
+    token: localStorage.getItem(TOKEN_KEY),
   },
   mutations: {
-    CLEAR_USER(state) {
-      state.user = null;
+    SET_TOKEN(state, token) {
+      state.token = token;
+      localStorage.setItem(TOKEN_KEY, token);
     },
-    SET_USER(state, user) {
-      state.user = user;
+    CLEAR_TOKEN(state) {
+      state.token = null;
+      localStorage.removeItem(TOKEN_KEY);
     },
+    // CLEAR_USER(state) {
+    //   state.user = null;
+    // },
+    // SET_USER(state, user) {
+    //   state.user = user;
+    // },
   },
   actions: {
     async login({ dispatch, commit }, { email, password }) {
-      try {
-        // const auth = getAuth();
-        await signInWithEmailAndPassword(auth, email, password);
-      } catch (e) {
-        console.log(e);
-      }
+      await signInWithEmailAndPassword(auth, email, password)
+        .then((userCredential) => {
+          const user = userCredential.user;
+          console.log(user);
+          console.log(user.accessToken);
+
+          commit("SET_TOKEN", user.accessToken);
+          commit("CLEAR_MESSAGE", null, { root: true });
+          // commit("SET_USER", auth.currentUser);
+          dispatch(
+            "setMessage",
+            { value: "Welcome", type: "primary" },
+            { root: true }
+          );
+
+          router.push("/");
+        })
+        .catch((e) => {
+          dispatch(
+            "setMessage",
+            { value: error(e.code), type: "danger" },
+            { root: true }
+          );
+        });
     },
     async register({ dispatch, commit }, { email, password, name }) {
-      try {
-        // const auth = getAuth();
+      await createUserWithEmailAndPassword(auth, email, password)
+        .then((userCredentials) => {
+          const user = userCredentials.user;
+          console.log(user);
 
-        const uuid = await dispatch("getUid");
-        await createUserWithEmailAndPassword(auth, email, password);
-        set(ref(db, "users/" + uuid), {
-          name: name,
-          email: email,
+          // commit("SET_USER", auth.currentUser);
+          dispatch(
+            "setMessage",
+            { value: "Done", type: "primary" },
+            { root: true }
+          );
+          router.push("/");
+        })
+        .catch((e) => {
+          dispatch(
+            "setMessage",
+            { value: error(e.code), type: "danger" },
+            { root: true }
+          );
         });
-      } catch (e) {
-        console.log(e);
-      }
+
+      const uid = await dispatch("getUid");
+      console.log(uid);
+
+      const info = {
+        name,
+        email,
+      };
+
+      set(ref(db, `users/${uid}/info`), info);
     },
     getUid() {
-      return Math.random().toString(36).substring(2);
+      const user = auth.currentUser;
+      return user ? user.uid : null;
     },
-    async logout({ commit }) {
-      await signOut(auth);
+    async logout({ commit, dispatch }) {
+      await signOut(auth)
+        .then(() => {
+          router.push("/login");
+          // commit("CLEAR_USER");
+          dispatch(
+            "setMessage",
+            {
+              value: "Done",
+              type: "primary",
+            },
+            { root: true }
+          );
+        })
+        .catch((e) => {
+          console.log(e);
+        });
 
-      commit("CLEAR_USER");
-
-      router.push("/login");
       console.log("signOut");
     },
-    // getUid() {
-    //   // const user = getAuth().currentUser;
-    //   return uuid;
-    // },
+    fetchUser({ commit, dispatch }) {
+      auth.onAuthStateChanged(async (user) => {
+        if (user === null) {
+          // commit("CLEAR_USER");
+        } else {
+          // commit("SET_USER", user);
+          const uid = user.uid;
+          console.log(uid);
+
+          if (router.isReady() && router.currentRoute.value.path === "/login") {
+            router.push("/");
+          }
+        }
+      });
+    },
+  },
+  getters: {
+    token(state) {
+      return state.token;
+    },
+    isAuthenticated(_, getters) {
+      return !!getters.token;
+    },
   },
 };

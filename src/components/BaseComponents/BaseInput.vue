@@ -43,13 +43,14 @@ export default {
 .label {
   display: block;
   margin: 8px 0;
-  font-size: $fs-ticket-text;
+  font-size: $fs-column-title;
 }
 
 .input {
   width: 100%;
   border: 1px solid $black;
-  padding: 10px 15px;
+  padding: 12px 15px;
   font-family: inherit;
+  font-size: $fs-column-title;
 }
 </style>

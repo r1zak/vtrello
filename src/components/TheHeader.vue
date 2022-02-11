@@ -3,29 +3,19 @@
     <!-- <div class="container"> -->
     <div class="header__inner">
       <h1>Vtrello</h1>
-      <button class="link" href="#" @click="$store.dispatch('logout')">
-        Log out
-      </button>
+      <button class="link" href="#" @click="logout">Log out</button>
     </div>
     <!-- </div> -->
   </header>
+  <!-- <router-view /> -->
 </template>
 
 <script>
 export default {
   methods: {
-    // logout() {
-    //   const auth = getAuth();
-    //   signOut(auth)
-    //     .then(() => {
-    //       this.$router.push("/login");
-    //       console.log("signOut");
-    //     })
-    //     .catch((e) => {
-    //       // An error happened.
-    //       console.log(e);
-    //     });
-    // },
+    logout() {
+      this.$store.dispatch("logout");
+    },
   },
 };
 </script>

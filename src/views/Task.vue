@@ -6,11 +6,10 @@
     </div>
     <div class="options">
       <button class="btn" @click="isCoverOpen = true">Change cover</button>
-      <button class="btn" @click="deleteList">Delete a list</button>
+      <button class="btn" @click="removeTask">Delete a task</button>
     </div>
   </div>
-
-  <div class="cover__inner" v-if="isCoverOpen">
+  <!-- <div class="cover__inner" v-if="isCoverOpen">
     <h5>Colors</h5>
     <ul class="cover__list">
       <li
@@ -22,7 +21,7 @@
         {{ color }}
       </li>
     </ul>
-  </div>
+  </div> -->
 </template>
 
 <script>
@@ -35,17 +34,28 @@ export default {
       colors: ["orange", "purple", "green", "blue", "red", "yellow"],
     };
   },
+
   computed: {
     ...mapGetters(["getTask"]),
     task() {
       return this.getTask(this.$route.params.id);
     },
-    deleteList() {
-      return null;
+  },
+  methods: {
+    removeTask(task) {
+      this.$store.commit("REMOVE_TASK", {
+        id: this.$route.params.id,
+        tasks: this.$route.params.tasks,
+        index: this.$route.params.index,
+      });
+      this.$store.dispatch("removeTask", {
+        id: this.$route.params.id,
+        tasks: this.$route.params.tasks,
+        index: this.$route.params.index,
+      });
+      this.$router.push({ name: "board" });
     },
   },
-  methods: {},
-  components: {},
 };
 </script>
 
@@ -53,7 +63,6 @@ export default {
 .task__inner {
   display: flex;
   position: relative;
-  // flex-direction: column;
   background-color: $white;
   padding: 41px;
   border-radius: 8px;
@@ -84,7 +93,6 @@ export default {
       text-align: left;
       width: 100%;
       padding: 10px 15px;
-      // border: 1px solid $black;
       background: $main-bg;
       border-radius: 4px;
     }
@@ -99,10 +107,8 @@ export default {
   right: 0;
   top: 0;
   border-radius: 4px;
-  // top: 50%;
   top: 11%;
   right: 3%;
-  // transform: translate(-50%, -50%);
   padding: 10px 12px;
   h5 {
     margin-bottom: 14px;
@@ -112,16 +118,12 @@ export default {
     grid-template-columns: repeat(3, 1fr);
     grid-gap: 19px 16px;
     &-item {
-      // flex: 1 1 33%;
+      cursor: pointer;
       height: 34px;
       max-width: 80px;
       width: 100%;
       border-radius: 4px;
     }
   }
-  // max-width: 200px;
-  // width: 100%;
-  // height: 100%;
-  // background: rgba(0, 0, 0, 0.5);
 }
 </style>

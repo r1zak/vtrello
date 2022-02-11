@@ -1,17 +1,6 @@
 <template>
   <div class="container">
-    <TheHeader />
     <div class="board">
-      <div class="board__column">
-        <BaseIcon name="plus" />
-        <input
-          class="input"
-          placeholder="Add another column"
-          @keyup.enter="addColumn"
-          v-model="newColumnName"
-        />
-      </div>
-
       <div
         class="board__inner"
         v-for="(column, $columnIndex) of board.columns"
@@ -19,31 +8,45 @@
       >
         <div class="title">
           <h3>{{ column.name }}</h3>
-          <BaseIcon name="more" />
+          <BaseIcon
+            @click="removeColumn($event, board.columns, $columnIndex)"
+            name="cancel"
+            class="icon"
+          >
+          </BaseIcon>
         </div>
         <ul class="task__list">
           <li
             class="task__list-item"
             v-for="(task, $taskIndex) of column.tasks"
             :key="$taskIndex"
-            @click="goToTask(task)"
+            @click="goToTask(task, column.tasks, $taskIndex)"
             v-show="task.name"
           >
             <h5>{{ task.name }}</h5>
             <p>{{ task.description }}</p>
-            <!-- <BaseIcon name="pencil" /> -->
           </li>
+          <div class="add">
+            <BaseIcon name="plus" />
+            <input
+              class="btn"
+              placeholder="Add a task"
+              @keyup.enter="addTask($event, column.tasks, board.columns)"
+            />
+          </div>
         </ul>
-        <div class="add">
-          <BaseIcon name="plus" />
-          <input
-            class="btn"
-            placeholder="Add a card"
-            @keyup.enter="addTask($event, column.tasks)"
-          />
-        </div>
+      </div>
+      <div class="board__column">
+        <BaseIcon name="plus" />
+        <input
+          class="input"
+          placeholder="Add another column"
+          @keyup.enter="addColumn($event, board.columns, column)"
+          v-model="newColumnName"
+        />
       </div>
     </div>
+
     <div
       class="task"
       v-if="isTaskOpen"
@@ -57,8 +60,8 @@
 
 <script>
 import BaseIcon from "@/components/BaseComponents/BaseIcon.vue";
-import TheHeader from "@/components/TheHeader.vue";
 import { mapState } from "vuex";
+import { mapGetters } from "vuex";
 
 export default {
   data() {
@@ -68,52 +71,113 @@ export default {
   },
   computed: {
     ...mapState(["board"]),
+    ...mapGetters(["getColumn"]),
     isTaskOpen() {
       return this.$route.name === "task";
     },
+    name(task) {
+      return this.getColumn(task.name);
+    },
   },
   methods: {
-    goToTask(task) {
-      this.$router.push({ name: "task", params: { id: task.id } });
-      // console.log(task.id);
+    goToTask(task, tasks, index) {
+      this.$router.push({
+        name: "task",
+        params: {
+          id: task.id,
+          tasks,
+          index,
+        },
+      });
     },
     close() {
       this.$router.push({ name: "board" });
     },
-    addTask(e, tasks) {
+    addTask(e, tasks, columns) {
       this.$store.commit("ADD_TASK", {
-        tasks,
         name: e.target.value,
+        tasks,
       });
+      try {
+        this.$store.dispatch("addTask", {
+          name: e.target.value,
+          tasks,
+          columns,
+        });
+        this.newColumnName = "";
+      } catch (e) {
+        console.log(e);
+      }
+
       e.target.value = "";
     },
-    addColumn() {
-      this.$store.commit("ADD_COLUMN", {
-        name: this.newColumnName,
+    addColumn(e, columns, column) {
+      if (!this.newColumnName == " ") {
+        this.$store.commit("ADD_COLUMN", {
+          name: this.newColumnName,
+          columns,
+        });
+        try {
+          this.$store.dispatch("addColumn", {
+            name: this.newColumnName,
+            columns,
+            column,
+          });
+          this.newColumnName = "";
+        } catch (e) {
+          console.log(e);
+        }
+      }
+    },
+    removeColumn(e, columns, index) {
+      this.$store.commit("REMOVE_COLUMN", {
+        columns,
+        index,
       });
-      this.newColumnName = "";
+      try {
+        this.$store.dispatch("removeColumn", {
+          name: this.newColumnName,
+          columns,
+          index,
+        });
+        this.newColumnName = "";
+      } catch (e) {
+        console.log(e);
+      }
+
+      // try {
+      //   this.$store.dispatch("removeColumn", {
+      //     name: this.newColumnName,
+      //   });
+      //   this.newColumnName = "";
+      // } catch (e) {
+      //   console.log(e);
+      // }
     },
   },
 
-  components: { BaseIcon, TheHeader },
+  components: { BaseIcon },
 };
 </script>
 
 <style lang="scss" scoped>
 ::-webkit-scrollbar {
+  position: absolute;
   height: 13px;
   width: 13px;
+  margin-right: 20px;
 }
 
 ::-webkit-scrollbar-track {
   background: #f1f1f1;
   border-radius: 4px;
+  left: 0;
 }
 
 ::-webkit-scrollbar-thumb {
   background: #888;
   border-radius: 4px;
-  bottom: 0;
+  left: 0;
 }
 
 ::-webkit-scrollbar-thumb:hover {
@@ -135,9 +199,8 @@ export default {
     font-size: inherit;
     justify-content: start;
     padding: 10px 15px;
-    max-width: 300px;
+    width: 300px;
     max-height: 40px;
-    // height: max-content;
     background-color: $white;
     border-radius: 4px;
     .input {
@@ -156,7 +219,7 @@ export default {
     background-color: $white;
     padding: 10px 15px;
     border-radius: 4px;
-    max-width: 300px;
+    width: 300px;
     width: 100%;
     height: max-content;
     margin-bottom: 20px;
@@ -164,6 +227,7 @@ export default {
       display: flex;
       justify-content: space-between;
       align-items: center;
+      margin: 0 -3px 6px 0;
     }
     .task__list {
       display: flex;
@@ -180,7 +244,6 @@ export default {
         border-radius: 4px;
         margin: 5px 0;
         cursor: pointer;
-        // max-width: 245px;
         width: 100%;
 
         &:hover {

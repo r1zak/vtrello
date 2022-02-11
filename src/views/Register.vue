@@ -5,10 +5,13 @@
         <fieldset>
           <legend>Welcome</legend>
           <BaseInput label="Email" type="email" v-model="email" />
+          <span>{{ emailError }}</span>
           <BaseInput label="Name" type="text" v-model="name" />
+          <span>{{ nameError }}</span>
           <BaseInput label="Password" type="password" v-model="password" />
+          <span>{{ passwordError }}</span>
           <button class="btn" type="submit">
-            Sign in
+            Sign Up
             <BaseIcon class="icon" name="log" />
           </button>
         </fieldset>
@@ -22,34 +25,53 @@
 </template>
 
 <script>
-import BaseInput from "@/components/BaseComponents/BaseInput.vue";
+import * as yup from "yup";
+import { ref, computed } from "vue";
+import { useStore } from "vuex";
+import { useForm, useField } from "vee-validate";
 import BaseIcon from "@/components/BaseComponents/BaseIcon.vue";
+import BaseInput from "@/components/BaseComponents/BaseInput.vue";
 
 export default {
-  data() {
+  setup() {
+    const store = useStore();
+
+    const schema = yup.object({
+      email: yup.string().required().email(),
+      password: yup.string().required().min(6),
+    });
+
+    useForm({
+      validationSchema: schema,
+    });
+
+    const { value: email, errorMessage: emailError } = useField("email");
+    const { value: name, errorMessage: nameError } = useField("fieldName");
+    const { value: password, errorMessage: passwordError } =
+      useField("password");
+
+    const reg_form = ref({
+      email,
+      password,
+      name,
+    });
+
+    const submitHandler = () => {
+      store.dispatch("register", reg_form.value);
+    };
+
     return {
-      email: "",
-      password: "",
-      name: "",
+      submitHandler,
+      reg_form,
+      email,
+      emailError,
+      password,
+      passwordError,
+      name,
+      nameError,
     };
   },
-  methods: {
-    async submitHandler() {
-      const formData = {
-        email: this.email,
-        password: this.password,
-        name: this.name,
-      };
-
-      try {
-        await this.$store.dispatch("register", formData);
-        this.$router.push("/");
-      } catch (e) {
-        console.log(e);
-      }
-    },
-  },
-  components: { BaseInput, BaseIcon },
+  components: { BaseIcon, BaseInput },
 };
 </script>
 
@@ -60,10 +82,11 @@ export default {
   top: 50%;
   transform: translate(-50%, -50%);
   &__inner {
-    min-width: 370px;
+    max-width: 370px;
     padding: 34px 60px;
     border-radius: 8px;
     background-color: $white;
+    width: 100%;
     fieldset {
       width: 100%;
       legend {
@@ -71,6 +94,12 @@ export default {
         font-weight: $fw-bold;
         text-align: center;
         margin-bottom: 20px;
+      }
+      span {
+        display: block;
+        margin-top: 5px;
+        font-size: $fs-ticket-text;
+        color: red;
       }
       .btn {
         display: flex;
